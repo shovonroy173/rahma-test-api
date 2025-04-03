@@ -73,8 +73,16 @@ export const getRequestConversation = async (req, res, next) => {
 export const getLastMessage = async (req, res, next) => {
   try {
     const message = await Message.findOne({
-      senderId: req.query.loggedUserId,
-      receiverId: req.query.receiverId,
+      $or: [
+        {
+          senderId: req.query.loggedUserId,
+          receiverId: req.query.receiverId,
+        },
+        {
+          senderId: req.query.receiverId,
+          receiverId: req.query.loggedUserId,
+        },
+      ],
     })
       .sort({ createdAt: -1 })
       .lean();
