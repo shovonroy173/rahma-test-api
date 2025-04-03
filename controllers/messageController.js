@@ -97,7 +97,7 @@ export const getLastMessage = async (req, res, next) => {
       senderId: req.query.loggedUserId,
       receiverId: req.query.receiverId,
     })
-      .sort({ created: -1 })
+      .sort({ createdAt: -1 })
       .lean();
     if (message) {
       const createdAt = new Date(message.createdAt);
