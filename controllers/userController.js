@@ -66,12 +66,12 @@ export const like = async (req, res, next) => {
     if (likedUser.liked.includes(req.body.loggedUserId)) {
       // It's a match! Update both users' matches array
       await Profile.findByIdAndUpdate(
-        loggedUserId,
+        req.body.loggedUserId,
         { $addToSet: { matches: req.body.id } },
         { new: true }
       );
       await Profile.findByIdAndUpdate(
-        likedProfileId,
+        req.body.id,
         { $addToSet: { matches: req.body.loggedUserId } },
         { new: true }
       );
