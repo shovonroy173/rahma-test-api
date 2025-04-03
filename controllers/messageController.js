@@ -99,27 +99,27 @@ export const getLastMessage = async (req, res, next) => {
     })
       .sort({ createdAt: -1 })
       .lean();
-    if (message) {
-      const createdAt = new Date(message.createdAt);
-      const now = new Date();
+    // if (message) {
+    //   const createdAt = new Date(message.createdAt);
+    //   const now = new Date();
 
-      // Format the date based on the condition
-      const isToday = createdAt.toDateString() === now.toDateString();
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const isYesterday = createdAt.toDateString() === yesterday.toDateString();
+    //   // Format the date based on the condition
+    //   const isToday = createdAt.toDateString() === now.toDateString();
+    //   const yesterday = new Date();
+    //   yesterday.setDate(yesterday.getDate() - 1);
+    //   const isYesterday = createdAt.toDateString() === yesterday.toDateString();
 
-      if (isToday) {
-        message.createdAt = createdAt.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }); // "10:15 AM"
-      } else if (isYesterday) {
-        message.createdAt = "Yesterday";
-      } else {
-        message.createdAt = createdAt.toLocaleDateString(); // "3/30/2025"
-      }
-    }
+    //   if (isToday) {
+    //     message.createdAt = createdAt.toLocaleTimeString([], {
+    //       hour: "2-digit",
+    //       minute: "2-digit",
+    //     }); // "10:15 AM"
+    //   } else if (isYesterday) {
+    //     message.createdAt = "Yesterday";
+    //   } else {
+    //     message.createdAt = createdAt.toLocaleDateString(); // "3/30/2025"
+    //   }
+    // }
 
     res.status(200).json(message);
   } catch (error) {
