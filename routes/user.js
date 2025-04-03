@@ -1,5 +1,5 @@
 import express from "express";
-import { like,  login,  user } from "../controllers/userController.js";
+import { like, login, user } from "../controllers/userController.js";
 import {
   getLikedUsers,
   getLikedYouUsers,
@@ -7,6 +7,7 @@ import {
   getUser,
   getUsers,
 } from "../controllers/getUserController.js";
+import { getActiveConversation, getLastMessage, getRequestConversation } from "../controllers/messageController.js";
 const router = express.Router();
 
 router.post("/user", user);
@@ -17,5 +18,8 @@ router.post("/like", like);
 router.get("/getlikedusers", getLikedUsers);
 router.get("/getlikedyouusers", getLikedYouUsers);
 router.get("/getmatchedusers", getMatchedUsers);
+router.get("/getactiveconversation", getActiveConversation);
+router.get("/getlastmessage", getLastMessage);
+router.get("/getrequestconversation", getRequestConversation);
 
 export default router;

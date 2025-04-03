@@ -8,6 +8,7 @@ import http from "http";
 import { Server } from "socket.io";
 import userRouter from "./routes/user.js";
 import Message from "./models/Message.js";
+import ChatSession from "./models/ChatSession.js";
 
 const app = express();
 
@@ -139,6 +140,34 @@ app.post("/api/sendMessage", async (req, res) => {
 
     await newMessage.save();
 
+    const senderMessages = await Message.find({ senderId, receiverId });
+    const receiverMessages = await Message.find({
+      senderId: receiverId,
+      receiverId: senderId,
+    });
+
+    if (senderMessages.length > 0 && receiverMessages.length > 0) {
+      // Update the chat session status to 'active'
+      await ChatSession.findOneAndUpdate(
+        { participants: { $all: [senderId, receiverId] } },
+        { status: "active" },
+        // { upsert: true } // Ensures the session is created if not found
+      );
+    } else {
+      // Check if a ChatSession already exists
+      let chatSession = await ChatSession.findOne({
+        participants: { $all: [senderId, receiverId] },
+      });
+
+      // If no session exists, create a new one with 'request' status
+      if (!chatSession) {
+        chatSession = new ChatSession({
+          participants: [senderId, receiverId],
+          status: "request",
+        });
+        await chatSession.save();
+      }
+    }
     const receiverSocketId = userSocketMap[receiverId];
 
     if (receiverSocketId) {
