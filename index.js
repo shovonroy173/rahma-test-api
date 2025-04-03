@@ -159,7 +159,8 @@ app.post("/api/sendMessage", async (req, res) => {
         {
           participants: [{ senderId: senderId }, { receiverId: receiverId }],
         },
-        { status: "active" }
+        { status: "active" }, 
+        {new : true},
         // { upsert: true } // This will create a new document if one doesn't exist
       );
       console.log('activeSession', activeSession);
