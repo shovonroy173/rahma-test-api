@@ -21,6 +21,13 @@ mongoose
   .then(() => console.log("Connected to Database!"))
   .catch(() => "Not Connected to Database!");
 
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  next();
+});
+
 app.use("/api", userRouter);
 
 app.use((err, req, res, next) => {
@@ -150,7 +157,7 @@ app.post("/api/sendMessage", async (req, res) => {
       // Update the chat session status to 'active'
       await ChatSession.findOneAndUpdate(
         { participants: { $all: [senderId, receiverId] } },
-        { status: "active" },
+        { status: "active" }
         // { upsert: true } // Ensures the session is created if not found
       );
     } else {
