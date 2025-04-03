@@ -4,41 +4,27 @@ import Profile from "../models/Profile.js";
 
 export const getActiveConversation = async (req, res, next) => {
   try {
+    // Find chat sessions where receiverId matches the logged-in user and status is 'request'
     const sessions = await ChatSession.find({
-      participants: req.query.id,
-      status: "active",
+      "participants.senderId": req.query.id,
+      status: "request",
     });
-    if (sessions.length <= 0) {
-      return res.status(400).json({ message: "No active conversation found" });
+
+    console.log("Request chat session", sessions);
+
+    if (sessions?.length <= 0) {
+      return res.status(400).json({ message: "No request conversation found" });
     } else {
-      const participantsPairs = sessions.map((session) => session.participants);
+      // Extract senderIds from the sessions (since we know receiverId is the logged-in user)
+      const receiverIds = sessions.map((session) => session.participants[0]?.receiverId || session.participants[1]?.receiverId);
 
-      const messages = await Message.find({
-        $or: participantsPairs.map(([user1, user2]) => ({
-          $or: [
-            { senderId: user1, receiverId: user2 },
-            { senderId: user2, receiverId: user1 },
-          ],
-        })),
-      }).sort({ createdAt: 1 });
-
-      const otherUserIds = new Set();
-      messages.forEach((msg) => {
-        if (msg.senderId.toString() !== req.query.id) {
-          otherUserIds.add(msg.senderId.toString());
-        }
-        if (msg.receiverId.toString() !== req.query.id) {
-          otherUserIds.add(msg.receiverId.toString());
-        }
-      });
-
-      // Fetch details of other users
+      // Fetch users with the extracted receiverIds
       const users = await Profile.find({
-        _id: { $in: Array.from(otherUserIds) },
+        _id: { $in: receiverIds },
       });
 
       res.status(200).json(users);
-      console.log(messages);
+      console.log(users);
     }
   } catch (error) {
     console.error("Error finding chat sessions:", error);
@@ -48,42 +34,27 @@ export const getActiveConversation = async (req, res, next) => {
 
 export const getRequestConversation = async (req, res, next) => {
   try {
+    // Find chat sessions where receiverId matches the logged-in user and status is 'request'
     const sessions = await ChatSession.find({
-      participants: req.query.id,
+      "participants.receiverId": req.query.id,
       status: "request",
     });
-    console.log("request chat session", sessions);
+
+    console.log("Request chat session", sessions);
+
     if (sessions?.length <= 0) {
       return res.status(400).json({ message: "No request conversation found" });
     } else {
-      const participantsPairs = sessions.map((session) => session.participants);
+      // Extract senderIds from the sessions (since we know receiverId is the logged-in user)
+      const senderIds = sessions.map((session) => session.participants[0]?.senderId || session.participants[1]?.senderId);
 
-      const messages = await Message.find({
-        $or: participantsPairs.map(([user1, user2]) => ({
-          $or: [
-            { senderId: user1, receiverId: user2 },
-            { senderId: user2, receiverId: user1 },
-          ],
-        })),
-      }).sort({ createdAt: 1 });
-
-      const otherUserIds = new Set();
-      messages.forEach((msg) => {
-        if (msg.senderId.toString() !== req.query.id) {
-          otherUserIds.add(msg.senderId.toString());
-        }
-        if (msg.receiverId.toString() !== req.query.id) {
-          otherUserIds.add(msg.receiverId.toString());
-        }
-      });
-
-      // Fetch details of other users
+      // Fetch users with the extracted senderIds
       const users = await Profile.find({
-        _id: { $in: Array.from(otherUserIds) },
+        _id: { $in: senderIds },
       });
 
       res.status(200).json(users);
-      console.log(messages);
+      console.log(users);
     }
   } catch (error) {
     console.error("Error finding chat sessions:", error);

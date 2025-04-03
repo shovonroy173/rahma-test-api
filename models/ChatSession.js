@@ -1,11 +1,17 @@
-import { model, Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const ChatSessionSchema = new Schema(
   {
     participants: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Profile",
+        senderId: {
+          type: Schema.Types.ObjectId,
+          ref: "Profile", // Refers to the Profile collection for the sender
+        },
+        receiverId: {
+          type: Schema.Types.ObjectId,
+          ref: "Profile", // Refers to the Profile collection for the receiver
+        },
       },
     ],
     status: {
@@ -14,9 +20,7 @@ const ChatSessionSchema = new Schema(
       default: "request",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default model("ChatSession", ChatSessionSchema);
