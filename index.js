@@ -155,16 +155,19 @@ app.post("/api/sendMessage", async (req, res) => {
 
     if (senderMessages.length > 0 && receiverMessages.length > 0) {
       // Update the chat session status to 'active'
-     const activeSession =  await ChatSession.findOneAndUpdate(
+      console.log("both sender receiver has message");
+
+      const activeSession = await ChatSession.findOneAndUpdate(
         {
-          participants: [{ senderId: senderId }, { receiverId: receiverId }],
+          "participants.senderId": receiverId,
+          "participants.receiverId": senderId 
         },
-        { status: "active" }, 
-        {new : true},
+        { status: "active" },
+        { new: true }
+      )
         // { upsert: true } // This will create a new document if one doesn't exist
-      );
-      console.log('activeSession', activeSession);
-      
+
+      console.log("activeSession", activeSession);
     } else {
       // Check if a ChatSession already exists
       let chatSession = await ChatSession.findOne({
