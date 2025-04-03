@@ -6,7 +6,15 @@ export const getActiveConversation = async (req, res, next) => {
   try {
     // Find chat sessions where receiverId matches the logged-in user and status is 'request'
     const sessions = await ChatSession.find({
-      "participants.senderId": req.query.id,
+      $or:[
+        {
+          "participants.senderId": req.query.id,
+
+        }, 
+        {
+          "participants.receiverId": req.query.id,
+        },
+      ],
       status: "active",
     });
 
