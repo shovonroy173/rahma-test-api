@@ -6,11 +6,10 @@ export const getActiveConversation = async (req, res, next) => {
   try {
     // Find chat sessions where receiverId matches the logged-in user and status is 'request'
     const sessions = await ChatSession.find({
-      $or:[
+      $or: [
         {
           "participants.senderId": req.query.id,
-
-        }, 
+        },
         {
           "participants.receiverId": req.query.id,
         },
@@ -24,7 +23,11 @@ export const getActiveConversation = async (req, res, next) => {
       return res.status(400).json({ message: "No request conversation found" });
     } else {
       // Extract senderIds from the sessions (since we know receiverId is the logged-in user)
-      const receiverIds = sessions.map((session) => session.participants[0]?.receiverId || session.participants[1]?.receiverId);
+      const receiverIds = sessions.map(
+        (session) =>
+          session.participants[0]?.receiverId ||
+          session.participants[1]?.receiverId
+      );
 
       // Fetch users with the extracted receiverIds
       const users = await Profile.find({
@@ -54,7 +57,10 @@ export const getRequestConversation = async (req, res, next) => {
       return res.status(400).json({ message: "No request conversation found" });
     } else {
       // Extract senderIds from the sessions (since we know receiverId is the logged-in user)
-      const senderIds = sessions.map((session) => session.participants[0]?.senderId || session.participants[1]?.senderId);
+      const senderIds = sessions.map(
+        (session) =>
+          session.participants[0]?.senderId || session.participants[1]?.senderId
+      );
 
       // Fetch users with the extracted senderIds
       const users = await Profile.find({
@@ -87,8 +93,8 @@ export const getLastMessage = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(1)
       .lean();
-      console.log("Last message", message);
-      
+    console.log("Last message", message);
+
     // if (message) {
     //   const createdAt = new Date(message.createdAt);
     //   const now = new Date();
@@ -114,5 +120,109 @@ export const getLastMessage = async (req, res, next) => {
     res.status(200).json(message);
   } catch (error) {
     next(error);
+  }
+};
+
+export const acceptRequest = async (req, res, next) => {
+  try {
+    const { loggedUserId, requestId } = req.body;
+    console.log(loggedUserId, requestId);
+
+    const user = await Profile.findById(loggedUserId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const updatedUser = await Profile.findByIdAndUpdate(
+      loggedUserId,
+      {
+        $pull: { requestconvos: { from: requestId } },
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    await Profile.findByIdAndUpdate(loggedUserId, {
+      $addToSet: { activeconvos: requestId },
+    });
+
+    const friendUser = await Profile.findByIdAndUpdate(requestId, {
+      $addToSet: { activeconvos: loggedUserId },
+    });
+
+    if (!friendUser) {
+      return res.status(404).json({ message: "Friend not found" });
+    }
+
+    res.status(200).json({ message: "Request accepted sucesfully" });
+  } catch (error) {
+    console.log("Error", error);
+    // res.status(500).json({ message: "Server Error" });
+    next(error);
+  }
+};
+
+export const sendRequest = async (req, res, next) => {
+  const { senderId, receiverId, message } = req.body;
+
+  console.log(senderId);
+  console.log(receiverId);
+  console.log(message);
+  try {
+    const receiver = await Profile.findById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({ message: "Receiver not found" });
+    }
+
+    await Profile.findByIdAndUpdate(
+      receiverId,
+      {
+        $addToSet: {
+          requestconvos: {
+            from: senderId,
+            message: message,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // await receiver.save();
+
+    res.status(200).json({ message: "Request sent succesfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRequests = async (req, res, next) => {
+  try {
+    const userId = req.query.id;
+    const user = await Profile.findById(userId).populate("requestconvos.from");
+
+    if (user) {
+      res.status(200).json(user.requestconvos);
+    } else {
+      res.status(400);
+      throw new Error("User not found");
+    }
+  } catch (error) {
+    console.log("error", error);
+  }
+};
+
+export const getActives = async (req, res, next) => {
+  try {
+    const userId = req.query.id;
+
+    const users = await Profile.findById(userId).populate("activeconvos");
+
+    res.status(200).json(users.activeconvos);
+  } catch (error) {
+    console.log("Error fetching user", error);
   }
 };

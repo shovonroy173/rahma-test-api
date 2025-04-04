@@ -70,6 +70,34 @@ const ProfileSchema = new Schema(
       },
     ],
     matches: [{ type: Schema.Types.ObjectId, ref: "Profile" }],
+    requestconvos: [
+      {
+        from: {
+          type: Schema.Types.ObjectId,
+          ref: 'Profile',
+          // required: true,
+        },
+        message: {
+          type: String,
+          // required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          enum: ['pending', 'accepted', 'rejected'],
+          default: 'pending',
+        },
+      },
+    ],
+    activeconvos: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Profile',
+      },
+    ],
   },
   { timestamps: true }
 );

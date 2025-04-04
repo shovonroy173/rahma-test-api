@@ -7,7 +7,15 @@ import {
   getUser,
   getUsers,
 } from "../controllers/getUserController.js";
-import { getActiveConversation, getLastMessage, getRequestConversation } from "../controllers/messageController.js";
+import {
+  acceptRequest,
+  getActiveConversation,
+  getActives,
+  getLastMessage,
+  getRequestConversation,
+  getRequests,
+  sendRequest,
+} from "../controllers/messageController.js";
 const router = express.Router();
 
 router.post("/user", user);
@@ -21,5 +29,10 @@ router.get("/getmatchedusers", getMatchedUsers);
 router.get("/getactiveconversation", getActiveConversation);
 router.get("/getlastmessage", getLastMessage);
 router.get("/getrequestconversation", getRequestConversation);
+
+router.post("/acceptrequest", acceptRequest);
+router.post("/sendrequest", sendRequest);
+router.get("/getrequests", getRequests);
+router.get("/getactives", getActives);
 
 export default router;
