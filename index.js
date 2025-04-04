@@ -167,7 +167,7 @@ app.post("/api/sendMessage", async (req, res) => {
       )
         // { upsert: true } // This will create a new document if one doesn't exist
 
-      console.log("activeSession", activeSession);
+      // console.log("activeSession", activeSession);
     } else {
       // Check if a ChatSession already exists
       let chatSession = await ChatSession.findOne({

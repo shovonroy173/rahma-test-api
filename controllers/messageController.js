@@ -18,7 +18,7 @@ export const getActiveConversation = async (req, res, next) => {
       status: "active",
     });
 
-    console.log("Request chat session", sessions);
+    // console.log("Request chat session", sessions);
 
     if (sessions?.length <= 0) {
       return res.status(400).json({ message: "No request conversation found" });
@@ -86,6 +86,8 @@ export const getLastMessage = async (req, res, next) => {
     })
       .sort({ createdAt: -1 })
       .lean();
+      console.log("Last message", message);
+      
     // if (message) {
     //   const createdAt = new Date(message.createdAt);
     //   const now = new Date();
