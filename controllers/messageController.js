@@ -72,7 +72,7 @@ export const getRequestConversation = async (req, res, next) => {
 
 export const getLastMessage = async (req, res, next) => {
   try {
-    const message = await Message.findOne({
+    const message = await Message.find({
       $or: [
         {
           senderId: req.query.loggedUserId,
@@ -85,6 +85,7 @@ export const getLastMessage = async (req, res, next) => {
       ],
     })
       .sort({ createdAt: -1 })
+      .limit(1)
       .lean();
       console.log("Last message", message);
       
