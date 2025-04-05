@@ -15,18 +15,21 @@ export const user = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    // const { email } = req.body;
 
-    const user = await Profile.findOne({
-      email,
-    });
+    // const user = await Profile.findOne({
+    //   email,
+    // });
 
-    console.log("User found:", user);
+    // console.log("User found:", user);
+    
+    const newUser = new Profile(req.body);
+    const savedUser = await newUser.save();
 
-    if (!user) {
+    if (!savedUser) {
       return res.status(400).json({ message: "Invalid email" });
     } else {
-      const token = jwt.sign({ userId: user._id }, process.env.secretKey);
+      const token = jwt.sign({ userId: savedUser._id }, process.env.secretKey);
 
       return res.status(200).json(token);
     }
